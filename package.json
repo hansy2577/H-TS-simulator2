@@ -4,21 +4,27 @@
   "author": "hansy2577",
   "description": "a 2D transport simulator",
 
-  "keywords": ["Game","transport","open source"],
+  "keywords": ["Game", "transport", "open source"],
   "license": "MIT",
   "main": "main.js",
 
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
-    "build": "electron-packager . HTS2 --platform=win32 --arch=x64 --out=dist --overwrite"
+    "build": "npm run build:windows",
+    "build:windows": "electron-packager . HTS2 --platform=win32 --arch=x64 --out=dist --overwrite",
+    "build:linux": "electron-packager . HTS2 --platform=linux --arch=x64 --out=dist --overwrite",
+    "android:sync": "npx cap sync android",
+    "android:build": "cd android && ./gradlew assembleDebug"
   },
 
   "devDependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/cli": "^7.4.3",
+    "@capacitor/core": "^7.4.3",
     "electron": "^42.4.0",
     "electron-packager": "^17.1.2"
   },
-
 
   "build": {
     "icon": "icon.ico",
