@@ -1,0 +1,21 @@
+{
+      "name":"euh",
+      
+      "line length": 50,
+      "line-BG length": 30,
+      "GrilleBG":[0,1,0,1,1],
+
+      "station":[
+            ["#image","dépôt.png",{ "position":[0,353], "z":"50", "scale":1.5, "meter": 0, "topTrain": true }],
+
+            ["test","j",{ "y":-80, "delay": 0, "meter": 0, "topTrain": false }],
+            
+            ["#image","random.png",{ "position":[0,0], "z":"1", "scale":0, "meter": 1, "topTrain": true }],
+            
+            ["#object","myObj.object",{ "position":[0,0], "z":"1", "scale":1, "meter": 1.5, "topTrain": false }],
+ 
+            ["test","h",{ "y":-80, "delay": 0, "meter": 1.7, "topTrain": false }]
+      ],
+      
+      "line delay": 0
+}

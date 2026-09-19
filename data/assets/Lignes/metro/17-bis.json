@@ -1,0 +1,31 @@
+{
+      "name":"euh",
+      
+      "line length": 6,
+      "line-BG length": 130,
+      "GrilleBG":[0,1,0,1,1,0,0,1],
+
+      "station":[
+            ["#image","dépôt.png",{ "position":[-100,375], "z":"1", "scale":1, "meter": 0.3, "topTrain": true}],
+            ["#image","dépôt.png",{ "position":[0,375], "z":"1", "scale":1, "meter": 0.3, "topTrain": true}],
+            
+            ["#object","myObj.object",{ "position":[0,0], "z":"1", "scale":1, "meter": 0.8, "topTrain": false}],
+            ["#object","myObj.object",{ "position":[-50,50], "z":"1", "scale":1.1, "meter": 0.8, "topTrain": true}],
+
+            ["test","j",{ "y":-80, "delay": 0, "meter": 0.9 }],
+      
+            ["#object","myObj.object",{ "position":[0,0], "z":"1", "scale":1, "meter": 2.5, "topTrain": false }],
+            ["test","h",{ "y":-80, "delay": 0, "meter": 2 }],
+            
+            ["#object","myObj.object",{ "position":[0,0], "z":"1", "scale":1, "meter": 4.5, "topTrain": false }],
+            ["test","k",{ "y":-80, "delay": 0, "meter": 4 }],
+            
+            ["#object","myObj.object",{ "position":[0,0], "z":"1", "scale":1, "meter": 6.5, "topTrain": false }],
+            ["test","p",{ "y":-80, "delay": 0, "meter": 6 }],
+            
+            ["#object","myObj.object",{ "position":[0,0], "z":"1", "scale":1, "meter": 11, "topTrain": false }],
+            ["test","c",{ "y":-80, "delay": 0, "meter": 12, "topTrain": false }]
+      ],
+      
+      "line delay": 0
+}
