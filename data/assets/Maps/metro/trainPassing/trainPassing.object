@@ -1,0 +1,1 @@
+{ "type":"TrainPassing", "data":[{ "name":"test2", "src":"myTrain.png", "position":[500,350,1], "scale":1.4}], "scripts":[""] }
