@@ -1,7 +1,7 @@
 
 var every = 100;
 var signaliste = 10;
-setInterval(() => {
+setInterval(() => {/*
       if (game.train.meter >= signaliste) {
             if (game.maps.signalisation.setAs <= 1) {
                   var random = [0](((Math.random() * 2)+1)+"") // get the first number 
@@ -24,5 +24,5 @@ setInterval(() => {
             }
             
             signaliste += every;
-      }
+      }*/
 },15)

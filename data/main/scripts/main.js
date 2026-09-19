@@ -1,5 +1,7 @@
 let doc = document;
-//sessionStorage.setItem("data",'["test","metro","test"]')
+
+//sessionStorage.setItem("data",'["MF77","metro","Testing Route"]')
+
 let doc_Get = function (id) {
       return document.getElementById(id); 
 }
@@ -10,13 +12,27 @@ if (JSON.parse(sessionStorage.getItem("data")) == null) {
 }
 
 let game = {
+      version: "2.7.5",
       choiseMaps: (JSON.parse(sessionStorage.getItem("data")))[1],
       choiseTrain: (JSON.parse(sessionStorage.getItem("data")))[0],
       choiseLigne: (JSON.parse(sessionStorage.getItem("data")))[2],
       gameLoad: false,
       
       gui: {
-            json: null
+            json: null,
+            
+            button: {
+                  doorsOpen: null,
+                  doorsClose: null,
+                  aws: null,
+                  auto: null,
+                  motor: null
+            }
+      },
+      
+      camera: {
+            x: 0,
+            y: 0
       },
       
       maps: {
@@ -29,6 +45,8 @@ let game = {
       },
       
       train: {
+            camPressOldPosition: 0,
+            camFixe: true,
             modeAuto: true,
             speedLimite: 120,
             manipulatorSpeedIn: 0,
@@ -53,16 +71,17 @@ let game = {
       }
 }
 
-function toMenu() {
-      window.location = "menu.html"
-}
+document.getElementById('game version').innerText = "v"+game.version;
 
+function toMenu() {
+      window.location = "menu.html";
+}
 
 getTrain()
 
 function getTrain() {
   // get the json file
-  var src = "main/Trains/"+game.choiseTrain+"/main.json";
+  var src = "assets/Trains/"+game.choiseTrain+"/main.json";
   var rawFile = new XMLHttpRequest();var reload = 0;rawFile.open("get",src, true);rawFile.onreadystatechange = function() 
   { reload++; if (rawFile.readyState === 4) { var allText = rawFile.responseText; };
     if (reload == 3) {
@@ -70,7 +89,7 @@ function getTrain() {
             alert("fail to get : \n'"+src+"' reson :\n"+allText)
             toMenu()
       } else {
-            game.train.path = "main/Trains/"+game.choiseTrain+"/";
+            game.train.path = "assets/Trains/"+game.choiseTrain+"/";
             game.train.json = JSON.parse(allText);
             getTrainAudio()
             getTrainUiModifier()
@@ -81,7 +100,7 @@ function getTrain() {
 
 function getTrainAudio() {
   // get the json file
-  var src = "main/Trains/"+game.choiseTrain+"/motor.json";
+  var src = "assets/Trains/"+game.choiseTrain+"/motor.json";
   var rawFile = new XMLHttpRequest();var reload = 0;rawFile.open("get",src, true);rawFile.onreadystatechange = function() 
   { reload++; if (rawFile.readyState === 4) { var allText = rawFile.responseText; };
     if (reload == 3) {
@@ -99,7 +118,7 @@ function getTrainAudio() {
 
 function getTrainUiModifier() {
   // get the json file
-  var src = "main/Trains/"+game.choiseTrain+"/UI.json";
+  var src = "assets/Trains/"+game.choiseTrain+"/UI.json";
   var rawFile = new XMLHttpRequest();var reload = 0;rawFile.open("get",src, true);rawFile.onreadystatechange = function() 
   { reload++; if (rawFile.readyState === 4) { var allText = rawFile.responseText; };
     if (reload == 3) {
@@ -115,7 +134,7 @@ function getTrainUiModifier() {
 
 function getMaps() {
   // get the json file
-  var src = "main/Maps/"+game.choiseMaps+"/main.json";
+  var src = "assets/Maps/"+game.choiseMaps+"/main.json";
   var rawFile = new XMLHttpRequest();var reload = 0;rawFile.open("get",src, true);rawFile.onreadystatechange = function() 
   { reload++; if (rawFile.readyState === 4) { var allText = rawFile.responseText; };
     if (reload == 3) {
@@ -133,7 +152,7 @@ function getMaps() {
 
 function getLigne() {
   // get the json file
-  var src = "main/Lignes/"+game.choiseLigne+".json";
+  var src = "assets/Lignes/"+game.choiseMaps+"/"+game.choiseLigne+".json";
   var rawFile = new XMLHttpRequest();var reload = 0;rawFile.open("get",src, true);rawFile.onreadystatechange = function() 
   { reload++; if (rawFile.readyState === 4) { var allText = rawFile.responseText; };
     if (reload == 3) {
@@ -155,12 +174,15 @@ function getLigne() {
 function load() {
       game.gameLoad = true;
       game.ligne.lineLength = game.ligne.json["line length"] * 10;
-      loadMotor()
       
-      loadModifiedGui()
-      loadTrainPassingFile()
+      document.getElementById("gui-button").style.scale = 1;
       
-      return afterLoading()
+      loadMotor();
+      showGui();
+      loadModifiedGui();
+      loadTrainPassingFile();
+      afterLoading();
+      loadTrainScripts();
 }
 
 function makeBG(data) {
@@ -178,6 +200,7 @@ function makeBG(data) {
       var grilleChoseBG = -1;
       var long = game.ligne.json["line-BG length"];
       var stati = 0;
+      var ligndRead = false
       for (var i = 0; i < long; i++) {
             x += 768*0.70;
             
@@ -192,51 +215,70 @@ function makeBG(data) {
             }
             
             if (stati <= game.ligne.json.station.length - 1) {
-                  if /* default station */ (i >= game.ligne.json.station[stati][2].meter * 10 && game.ligne.json.station[stati][0][0] !== "#") {
+                  if (!ligndRead && game.ligne.json.station[stati] == undefined) {
+                        stati++;
+                        ligndRead = true;
+                  }
+  
+                  if /* default station */ (!ligndRead && i >= game.ligne.json.station[stati][2].meter * 10 && game.ligne.json.station[stati][0][0] !== "#") {
                         var station = doc.createElement("img");
-                        doc.getElementById("BG").appendChild(station)
+                        if (!game.ligne.json.station[stati][2].topTrain) {
+                              doc.getElementById("BG").appendChild(station)
+                        } else {
+                              doc.getElementById("BG2").appendChild(station)
+                        }
                         station.id = "u"
                         station.style.scale = 0.7;
                         station.style.zIndex = 1
                         station.style.position = "absolute";
                         station.style.left = x+"px";
                         station.style.top = game.ligne.json.station[stati][2].y+"px"//game.maps.json.sprites.BG[game.ligne.json.GrilleBG[grilleChoseBG]][0][2]+"px";
-                        station.src = "main/Maps/"+game.maps.json.folder+"/"+game.ligne.json.station[stati][0]+".png";
+                        station.src = "assets/Maps/"+game.maps.json.folder+"/"+game.ligne.json.station[stati][0]+".png";
                         station.onerror = function () {
-                              alert("fail to load images :"+game.ligne.json.station[stati][1]+" \n at line :"+stati+" \n from 'main.js' ")
+                              alert("fail to load images '"+game.ligne.json.station[stati][1]+"' \n at line :"+stati+" \n from 'main.js' ")
                               return;
                         }
+                        ligndRead = true;
                         stati++;
                   }
                   
-                  if /* images */ (i >= game.ligne.json.station[stati][2].meter * 10 && game.ligne.json.station[stati][0] == "#image") {
+                  if /* images */ (!ligndRead && i >= game.ligne.json.station[stati][2].meter * 10 && game.ligne.json.station[stati][0] == "#image") {
                         var e = doc.createElement("img");
-                        doc.getElementById("BG").appendChild(e)
+                        if (!game.ligne.json.station[stati][2].topTrain) {
+                              doc.getElementById("BG").appendChild(e)
+                        } else {
+                              doc.getElementById("BG2").appendChild(e)
+                        }
                         e.id = "u"
+                        e.style.position = "absolute";
                         e.style.scale = game.ligne.json.station[stati][2].scale;
                         e.style.zIndex = game.ligne.json.station[stati][2].z;
-                        e.style.position = "absolute";
                         e.style.left = (x + game.ligne.json.station[stati][2].position[0] * 10)+"px";
                         e.style.top = game.ligne.json.station[stati][2].position[1]+"px"//game.maps.json.sprites.BG[game.ligne.json.GrilleBG[grilleChoseBG]][0][2]+"px";
-                        e.src = "main/Maps/"+game.maps.json.folder+"/"+game.ligne.json.station[stati][1];
+                        e.src = "assets/Maps/"+game.maps.json.folder+"/"+game.ligne.json.station[stati][1];
                         
                         e.onerror = function () {
-                              alert("fail to load custom images :"+game.ligne.json.station[stati][1]+" \n at line :"+stati+" \n \n from 'main.js'")
+                              alert("fail to load custom images '"+game.ligne.json.station[stati][1]+"' \n at line :"+stati+" \n \n from 'main.js'")
                               return;
                         }
                         
+                        ligndRead = true;
                         stati++;
                   }
                   
-                  if /* object */ (i >= game.ligne.json.station[stati][2].meter * 10 && game.ligne.json.station[stati][0] == "#object") {
-                        makeObj("main/Maps/"+game.choiseMaps+"/"+game.ligne.json.station[stati][1],"main/Maps/"+game.choiseMaps+"/",{
+                  if /* object */ (!ligndRead && i >= game.ligne.json.station[stati][2].meter * 10 && game.ligne.json.station[stati][0] == "#object") {
+                        makeObj("assets/Maps/"+game.choiseMaps+"/"+game.ligne.json.station[stati][1],"assets/Maps/"+game.choiseMaps+"/",{
                               scale: game.ligne.json.station[stati][2].scale,
                               z: game.ligne.json.station[stati][2].z,
                               xd: (x + game.ligne.json.station[stati][2].position[0] * 10),
-                              yd: game.ligne.json.station[stati][2].position[1]
-                        })                    
+                              yd: game.ligne.json.station[stati][2].position[1],
+                              topTr: game.ligne.json.station[stati][2].topTrain
+                        })                  
+                        ligndRead = true;
                         stati++;
                   }
+                  
+                  ligndRead = false;
 
             }
             //console.log(grilleChoseBG)
@@ -253,7 +295,7 @@ function makeBG(data) {
             track.style.zIndex = "2";
             //track.style.backgroundColor = "red"
             track.style.backgroundSize = "768px";
-            track.style.backgroundImage = "url(main/Maps/"+game.maps.json.folder+"/Track.png)"
+            track.style.backgroundImage = "url(assets/Maps/"+game.maps.json.folder+"/Track.png)"
 
             
             var bg = doc.createElement("img");
@@ -264,7 +306,7 @@ function makeBG(data) {
             bg.style.position = "absolute";
             bg.style.left = x+"px";
             bg.style.top = game.maps.json.sprites.BG[game.ligne.json.GrilleBG[grilleChoseBG]][0][2]+"px";
-            bg.src = "main/Maps/"+game.maps.json.folder+"/"+game.maps.json.sprites.BG[game.ligne.json.GrilleBG[grilleChoseBG]][0][0]
+            bg.src = "assets/Maps/"+game.maps.json.folder+"/"+game.maps.json.sprites.BG[game.ligne.json.GrilleBG[grilleChoseBG]][0][0]
             
             var bg2 = doc.createElement("img");
             doc.getElementById("BG").appendChild(bg2)
@@ -274,7 +316,7 @@ function makeBG(data) {
             bg2.style.zIndex = -2
             bg2.style.left = x+"px";
             bg2.style.top = game.maps.json.sprites.BG[game.ligne.json.GrilleBG[grilleChoseBG]][1][2]+"px";
-            bg2.src = "main/Maps/"+game.maps.json.folder+"/"+game.maps.json.sprites.BG[game.ligne.json.GrilleBG[grilleChoseBG]][1][0]
+            bg2.src = "assets/Maps/"+game.maps.json.folder+"/"+game.maps.json.sprites.BG[game.ligne.json.GrilleBG[grilleChoseBG]][1][0]
       }
       
 }
@@ -321,7 +363,7 @@ function afterLoading() {
 }
 
 
-function makeObj(obj,defaultSrc,{ xd, yd, z, scale }) {
+function makeObj(obj,defaultSrc,{ xd, yd, z, scale, topTr }) {
   // get the json file
   var src = obj;
   var rawFile = new XMLHttpRequest();var reload = 0;rawFile.open("get",src, true);rawFile.onreadystatechange = function() 
@@ -333,13 +375,17 @@ function makeObj(obj,defaultSrc,{ xd, yd, z, scale }) {
             var data = JSON.parse(allText);
           f = document.createElement("div");
     f.id = "#object"; //data.name;
-    f.style.cssText  = "position: absolute; left: "+xd+"px; top:"+yd+"; scale: "+scale+"; z-index: "+z+";"
-    document.body.appendChild(f)
+    f.style.cssText  = "position: absolute; left: "+xd+"px; top:"+yd+"px; scale: "+scale+"; z-index: "+z+";"
+                        if (!topTr) {
+                              doc.getElementById("BG").appendChild(f)
+                        } else {
+                              doc.getElementById("BG2").appendChild(f)
+                        }
 
   for (var i = 0; i < data.data.length; i++) {
     
     const b = document.createElement("img");
-    b.id = "p"+i//data.data[i].name;
+    b.id = "p"+Math.random() * 10;//data.data[i].name;
     b.style.cssText = "position: absolute; z-index:"+data.data[i].position[2]+"; left:"+(
       data.data[i].position[0]
     )+"px; top:"+(
@@ -353,4 +399,27 @@ function makeObj(obj,defaultSrc,{ xd, yd, z, scale }) {
       } 
     }
   };rawFile.send();
+}
+
+
+function camChange() {
+      if (game.train.camFixe) {
+            game.camera.x = 0;
+            game.camera.y = 0;
+            
+            game.train.camFixe = false;
+            game.train.camPressOldPosition = game.train.meter;
+      } else {
+            game.train.camFixe = true;
+      }
+}
+
+function loadTrainScripts() {
+      for (var i = 0; i < game.train.json.scripts.length; i++) {
+            var s = document.createElement("script");
+            s.src = game.train.path + game.train.json.scripts[i];
+            document.body.appendChild(s);
+          
+            console.info("scripts '"+game.train.json.scripts[i]+"' playing/found successfully !")
+      }
 }
