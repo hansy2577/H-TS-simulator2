@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>HTML</title>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <img src="assets/images/Track.png" style="position: absolute; opacity: 0.5; top: 79px; left: -260px; height: 768px; scale: 0.7; z-index: 0;" />
+  
+  <img id="croix" src="assets/images/croix.png" style="left: -200px; scale: 0.2; position: absolute; z-index: 7;" alt="" />
+  <button style="position: absolute; z-index: 4;" onclick="window.location = 'menu.html'" >exits</button>
+  <button style="position: absolute; z-index: 4; left: 50px;" onclick="saveD();" >Save</button>
+
+  <input style="position: absolute; z-index: 4; left: 10px; top: 45px; background-color: white;" name="" id="src" value="test" />
+  <button style="position: absolute; left: 200px; top: 45px;" onclick="load_Train()" >ok</button>
+
+  <input style="position: absolute; width: 50px; z-index: 4; left: 10px; top: 75px; background-color: white;" id="x" value="0" />
+  <input style="position: absolute; width: 50px; z-index: 4; left: 70px; top: 75px; background-color: white;" id="y" value="0" />
+  <input style="position: absolute; width: 50px; z-index: 4; left: 130px; top: 75px; background-color: white;" id="s" value="0" />
+
+  <input style="position: absolute; width: 250px; z-index: 4; left: 10px; top: 100px; background-color: white;" id="src" value="" />
+
+
+  <style>
+    
+    body {
+      background-color: grey;
+      background-image: url("assets/images/BG.png");
+    }
+    
+  </style>
+  <script src="assets/scripts/trainEditor/main.js"></script></script>
+</body>
+</ht

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>HTML</title>
+  
+  <!-- HTML -->
+  
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <button style="position: absolute; left: 1100px; top: 735px; scale: 1.8; z-index: 5;" onclick="traction.up()">A</button>
+  <button style="position: absolute; left: 1100px; top: 775px; scale: 1.8; z-index: 5;" onclick="traction.down()">V</button>
+
+
+  <!-- <a style="position: absolute; z-index: 5; scale: 1.3; top: 70px; left: 50px;" id="pop">0</a>-->
+  
+  <a style="color: white; position: absolute; z-index: 5; scale: 1; top: 730px; left: 840px; text-align: center;" id="NewStation">new is: test</a>
+  <a style="position: absolute; z-index: 5; scale: 1.4; top: 750px; left: 1050px;" id="speedType">0</a>
+  <a style="position: absolute; z-index: 6; scale: 2.2; top: 745px; left: 700px;" id="speedCount">0</a>
+
+  <div id="loaf" style="position: absolute; z-index: 4; left: 0px; top: 0px; border-radius: 20px ; width: 1500px; height: 1000px; background-color: black; padding:5px;"></div>
+  
+  <div id="gui">
+    <div id="gui-main" style="position: absolute; z-index: 4; left: 270px; top: 720px; border-radius:20px ; width: 900px; height: 120px; background-color: #4FACF4; padding:5px;"></div>
+    <div style="position: absolute; z-index: 4; left: 270px; top: 690px; border-radius:10px ; width: 100px; height: 25px; background-color: #4FACF4; padding:5px;"></div>
+    <div style="position: absolute; z-index: 4; left: 1035px; top: 720px; border-radius:10px ; width: 30px; height: 120px; background-color: #8BCCFF; padding:5px;"></div>
+  
+    <div style="position: absolute; z-index: 4; left: 830px; top: 725px; border-radius:5px ; width: 110px; height: 110px; background-color: black; padding:5px;"></div>
+  </div>
+
+  <!--file-->
+
+  <div id="BG" style="position: absolute;">
+  </div>
+  
+  <script src="assets/library/spritesSheeptMaker/main.js"></script>
+  <script src="assets/scripts/GUI.js"></script>
+  <script src="assets/scripts/train/trainMotor.js"></script>
+  <script src="assets/scripts/train/trainPassing.js"></script>
+  <script src="assets/scripts/train/train.js"></script>
+
+  <script src="assets/scripts/main.js"></script>
+  <script src="assets/scripts/train/trainTraction.js"></script>
+  <script src="assets/scripts/signalisation.js"></script>
+
+  </script>
+</body>
+</html>
