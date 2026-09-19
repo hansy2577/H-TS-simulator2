@@ -1,17 +1,17 @@
 {
-  "name": "Funky-mit engine",
-  "version": "1.4.0",
+  "name": "HTS-simulator2",
+  "version": "2.4.5",
   "author": "hansy2577",
-  "description": "fnf pysch engine but remade in HTML JS !1!!1!",
+  "description": "a 2D transport simulator",
 
-  "keywords": ["Game", "Rhythm", "Music","Friday Night Funkin'"],
+  "keywords": ["Game","transport","open source"],
   "license": "MIT",
   "main": "main.js",
 
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
-    "build": "electron-packager . Funky_mit_engine --platform=win32 --arch=x64 --out=dist --overwrite"
+    "build": "electron-packager . HTS2 --platform=win32 --arch=x64 --out=dist --overwrite"
   },
 
   "devDependencies": {
@@ -23,7 +23,7 @@
   "build": {
     "icon": "icon.ico",
     "appId": "com.h.project",
-    "productName": "Funky.mit-engine",
+    "productName": "HTS",
     "directories": {
       "buildResources": "assets",
       "output": "output-exe"
@@ -51,7 +51,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Funky.mit-engine"
+      "shortcutName": "HTS-simulator2"
     }
   }
 }
