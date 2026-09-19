@@ -1,0 +1,22 @@
+{
+      "name":"test",
+      "folder":"metro", 
+      
+      "trainPassing propriété":{
+            "speed": 20,
+            "folder": "trainPassing",
+            "maxPosition": -400
+      },
+      "backgroundColor":"black",
+      "sprites":{
+            "BG":[
+                  [["BG1.png",1,[-200]],["BG21.png",1,[-50]]],
+                  [["BG2.png",1,[-200]],["BG21.png",1,[-50]]]
+            ],
+            
+            "track":[
+                  ["Track.png",[0]]
+            ]
+      }
+
+}
