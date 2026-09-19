@@ -1,0 +1,6 @@
+{
+  "appId": "com.h.project",
+  "appName": "HTS-simulator2",
+  "webDir": ".",
+  "bundledWebRuntime": false
+}
