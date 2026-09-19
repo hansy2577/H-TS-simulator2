@@ -16,7 +16,9 @@
   <button disabled onclick="playViews()" >play | mode-views</button>
   <a>other :</a>
   <button onclick="window.location = 'trainEditor.html'; " >objectEditor</button>
-
+  
+  <a style="position: absolute; color: white; width: 500px; z-index: 1; left: 700px; top: 400px;" id="description">...</a>
+  
   <div id="bg" style="position: absolute;">
     <div style="position: absolute; width: 650px; height: 900px; opacity: 0.7; border-radius: 5px; left: -10px; top: 10px; background-color: black;"></div>
   
@@ -29,15 +31,15 @@
   
   <div id="main" style="position: absolute; left: 10px; scale: 1.2;">
     
-    <a style="position: absolute; z-index: 4; left: 15px; width: 500px; top: 75px; color: white;" >train :</a>
+    <a style="position: absolute; z-index: 4; left: 7px; width: 500px; top: 75px; color: white;" >Trains :</a>
     <input style="position: absolute; z-index: 4; left: 60px; top: 75px; background-color: white;" name="" id="T" value="" />
     <div id="trainlist" style="position: absolute; top: 100px; width: 500px; height: 85px; background-color: #FFFFFF73; border: 2px dashed white"></div>
   
-    <a style="position: absolute; z-index: 4; left: 10px; width: 500px; top: 250px; color: white;" >maps :</a>
+    <a style="position: absolute; z-index: 4; left: 10px; width: 500px; top: 250px; color: white;" >Maps :</a>
     <input style="position: absolute; z-index: 4; left: 60px; top: 250px; background-color: white;" name="" id="M" value="" />
     <div id="mapslist" style="position: absolute; top: 275px; width: 500px; height: 85px; background-color: #FFFFFF73; border: 2px dashed white"></div>
 
-    <a style="position: absolute; z-index: 4; left: 15px; width: 500px;top: 405px; color: white;" >ligne :</a>
+    <a style="position: absolute; z-index: 4; left: 5px; width: 500px;top: 405px; color: white;" >Lignes :</a>
     <input onchange="reloadList()" style="position: absolute; z-index: 4; left: 60px; top: 405px; background-color: white;" name="" id="L" value="" />
     <div id="lignelist" style="position: absolute; top: 430px; width: 500px; height: 85px; background-color: #FFFFFF73; border: 2px dashed white"></div>
   </div>
@@ -46,12 +48,12 @@
     
     body {
       background-color: #676768;
-      background-image:  url("assets/images/BG.png");
+      background-image:  url("main/images/BG.png");
       background-size: 50px;
     }
     
   </style>
-  <script src="assets/scripts/menu.js"></script>
+  <script src="main/scripts/menu/menu.js"></script>
 
   </script>
 </body>
