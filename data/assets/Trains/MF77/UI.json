@@ -1,0 +1,9 @@
+{
+      "center": {
+            "backgroundColor": "#03C17D",
+            "padding": "0"
+      },
+      
+      "is-BackgroundImages": false,
+      "backgroundImages":["cabine.png",{ "x":40, "y":550, "scale":0.85 }]
+}

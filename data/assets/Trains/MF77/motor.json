@@ -1,0 +1,48 @@
+{
+      "traction speed": 0.085,
+      "brake speed": 0.13,
+      
+      "motor audio":{
+            "events": {
+                  "open-doors": ["audio/doorsO.ogg",{ "volume": 1 }],
+                  "close-doors": ["audio/doorsC.ogg",{ "volume": 1 }],
+       
+                  "button-press": ["audio/press.ogg",{ "volume": 0.5 }],
+                  
+                  "urgencyBrack-press": ["audio/DeCompression.ogg",{ "volume": 1 }],
+   
+                  "manipulator-change": ["audio/press.ogg",{ "volume": 1 }],
+
+                  "disable-brack": ["audio/unBrack.ogg",{ "volume": 0.7 }]
+
+            },
+                  
+            "start-audio": ["audio/startAmb.ogg",{
+                  "max-speed": 100,
+                  "disable onTration": true,
+                  "allow pitch": [false,0.04],
+                  "volume": 0.5
+            }],
+
+            "brack-ambiance": ["audio/Neutre.ogg",{
+                  "volume": 1
+            }],
+                  
+            "loop-ambiance": ["audio/Neutre.ogg",{
+                  "volume": 0.5,
+                  "only motor on": false
+            }],
+
+            "ambiance": ["audio/amb2.ogg",{
+                  "allow pitch": [true,0.09],
+                  "allow volumeManipulatorSync": true,
+                  "volume": 1
+            }],
+                  
+            "ambiance2": ["audio/static.ogg",{
+                  "allow pitch": [true,0.06],
+                  "allow volumeManipulatorSync": false,
+                  "volume": 0.9
+            }]
+      }
+}
