@@ -1,0 +1,1 @@
+{ "type":"custom", "data":[{ "name":"test2", "src":"Maps/test/BG2.png", "position":[-100,0,1], "scale":0.7},{ "name":"test", "src":"Maps/test/BG2.png", "position":[5,0,1], "scale":0.5}], "scripts":[] }
