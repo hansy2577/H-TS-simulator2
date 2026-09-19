@@ -1,4 +1,4 @@
-name: Build Windows EXE
+name: build in win linux apk
 
 on:
   workflow_dispatch:
@@ -27,12 +27,79 @@ jobs:
         run: npm install
 
       - name: Package Windows application
-        run: npm run build
+        run: npm run build:windows
 
       - name: Upload Windows executable
         uses: actions/upload-artifact@v4
         with:
           name: HTS2-windows-x64
           path: dist/HTS2-win32-x64/
+          if-no-files-found: error
+          compression-level: 6
+
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Package Linux application
+        run: npm run build:linux
+
+      - name: Upload Linux application
+        uses: actions/upload-artifact@v4
+        with:
+          name: HTS2-linux-x64
+          path: dist/HTS2-linux-x64/
+          if-no-files-found: error
+          compression-level: 6
+
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Create Android project
+        run: npx cap add android
+
+      - name: Sync web application into Android project
+        run: npx cap sync android
+
+      - name: Build Android debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: HTS2-android-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           compression-level: 6
