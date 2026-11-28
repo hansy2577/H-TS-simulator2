@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>H-TS2 Editor | Station editor</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-size: 15px;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.489);
+      font-family: Arial, sans-serif;
+      background: grey url("main/images/BG.png") repeat;
+    }
+
+    button, input, select { font: inherit; }
+
+    button {
+      padding: 5px 9px;
+      border: 1px solid #777;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #topbar {
+      position: fixed;
+      z-index: 10;
+      inset: 0 0 auto;
+      min-height: 58px;
+      align-items: center;
+      text-align: right;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 8px;
+      background: linear-gradient(90deg, #7f7f7f, #3e3e3e);
+      border-bottom: 2px solid #111;
+    }
+
+    #topbar input { width: 120px; }
+
+    #workspace {
+      position: absolute;
+      inset: 58px 300px 0 0;
+      overflow: hidden;
+    }
+
+    #canvas {
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background: #797979;
+    }
+
+    #canvas-body {
+      position: relative;
+      width: 2100px;
+      height: 500px;
+      transform-origin: top left;
+    }
+
+    #track {
+      position: absolute;
+      top: 295px;
+      left: 0;
+      width: 100000px;
+      height: 10px;
+      border-block: 3px solid #333;
+      background: repeating-linear-gradient(
+        90deg,
+        #181818 0,
+        #929292 60px,
+        #000000 160px,
+        #181818 168px
+      );
+    }
+
+    #entries {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .entry-image {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+      pointer-events: auto;
+    }
+
+    .entry-image:active { cursor: grabbing; }
+
+    .entry-image.selected {
+      outline: 2px solid #4da3ff;
+      outline-offset: 2px;
+    }
+
+    #sidebar {
+      position: fixed;
+      top: 58px;
+      right: 0;
+      bottom: 0;
+      width: 300px;
+      overflow: auto;
+      padding: 10px;
+      background: #5b5b5b;
+      border-left: 2px solid #111;
+    }
+
+    #sidebar2 {
+      position: fixed;
+      top: 58px;
+      right: -1;
+      bottom: 0;
+      width: 300px;
+      overflow: auto;
+      
+      padding: 10px;
+      opacity: 0.5;
+      border-left: 2px solid #111;
+    }
+
+    .panel {
+      margin-bottom: 10px;
+      padding: 9px;
+      border: 1px solid #777;
+      border-radius: 6px;
+      background: #ededed;
+    }
+
+    .panel h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+    }
+
+    .field {
+      display: grid;
+      grid-template-columns: 95px 1fr;
+      align-items: center;
+      gap: 5px;
+      margin: 5px 0;
+    }
+
+    .field input, .field select {
+      width: 100%;
+      min-width: 0;
+    }
+
+    #entry-list {
+      max-height: 180px;
+      overflow: auto;
+    }
+
+    .list-entry {
+      display: flex;
+      justify-content: space-between;
+      gap: 5px;
+      margin: 3px 0;
+      padding: 5px;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      background: white;
+      cursor: pointer;
+    }
+
+    .list-entry.selected {
+      border-color: #3a7bd5;
+      background: #cce4ff;
+    }
+
+    #json-preview {
+      width: 100%;
+      height: 180px;
+      resize: vertical;
+      font-family: monospace;
+      font-size: 11px;
+    }
+
+    .danger { color: #a00000; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+
+<body>
+  <header style="padding: 3px; border-radius: 5px; box-shadow: 10px 10px 10px 1px rgba(0, 0, 0, 0.322); text-align: left;" id="topbar">
+    <button onclick="exitEditor()">Exit</button>
+    <button onclick="newLine()">New</button>
+    <button onclick="downloadJSON()">Save JSON</button>
+
+    <label>Load: <input id="lineFile" type="file" accept=".json"></label><a></a>
+    <button onclick="loadJSONFile()"> Load file</button>
+
+    <label>
+      Zoom:
+      <input id="zoom" type="number" min="25" max="200" value="100"> %
+    </label>
+  </header>
+
+  <main id="workspace">
+    <div id="canvas" style="border: 5px solid #111;">
+      <div id="canvas-body">
+        <div id="track" style="width: 100000px;"></div>
+        <div id="entries"></div>
+      </div>
+    </div>
+  </main>
+
+    <aside id="sidebar2">
+      <section class="panel" style="box-shadow: 10px 10px 15px rgba(0, 0, 0, 0.67);">
+      <h3 style="background-color: grey; padding: 3px; border-radius: 10px;">Selected element :</h3>
+      <div class="field"><label for="selectedName">Name</label><input id="selectedName" readonly></div>
+      <div class="field"><label for="selectedType">Type</label><input id="selectedType" readonly></div>
+      <div class="field"><label for="selectedMeter">Position/Meter:</label><input id="selectedMeter" type="number" step="0.1"></div>
+      <div class="field"><label for="selectedDelay">Delay</label><input id="selectedDelay" type="number" step="0.1"></div>
+      <div class="field"><label for="selectedScale">Scale</label><input id="selectedScale" type="number" step="0.1"></div>
+      <div class="field"><label for="selectedZ">Z-index</label><input id="selectedZ" type="number"></div>
+
+      <div class="field" style="visibility: hidden;">
+        <label for="selectedTopTrain">Above train</label>
+        <select id="selectedTopTrain">
+          <option value="false">No</option>
+          <option value="true">Yes</option>
+        </select>
+      </div>
+
+      <div class="field"><label for="selectedCategory">Event category</label><input id="selectedCategory"></div>
+      <button onclick="applySelection()" style="background-color: green;">Update</button>
+      <button class="danger" style="background-color: rgb(234, 72, 72);" onclick="deleteSelected()">Delete</button>
+    </section>
+    </aside>
+
+  <aside style="padding: 3px; border-radius: 5px; box-shadow: 10px 10px 10px 10px rgba(0, 0, 0, 0.67);" id="sidebar">
+    <section style="padding: 10px; border-radius: 0px; background-color: white;" class="panel">
+      <h3 style="background-color: grey; padding: 3px; border-radius: 10px;">Line metadata :</h3>
+      <div class="field"><label for="lineTitle">Name</label><input id="lineTitle" value="New Route"></div>
+      <div class="field"><label for="lineAuthor">Author</label><input id="lineAuthor" value="hansy"></div>
+      <div class="field"><label for="lineDescription">Description</label><input id="lineDescription"></div>
+      <div class="field"><label for="destination">Destination</label><input id="destination" value="test"></div>
+      <div class="field"><label for="lineLength">Line length</label><input id="lineLength" type="number" min="0" step="0.1" value="6"></div>
+      <div class="field"><label for="lineBGLength">BG length</label><input id="lineBGLength" type="number" min="1" value="130"></div>
+      <div class="field"><label for="lineDelay">Line delay</label><input id="lineDelay" type="number" step="0.1" value="0"></div>
+      <div class="field"><label for="grilleBG">BG pattern</label><input id="grilleBG" value="0,1,0,1,1,0,0,1"></div>
+    </section>
+
+    <section class="panel">
+      <h3 style="background-color: grey; padding: 3px; border-radius: 10px;">Add Event :</h3>
+
+      <div class="field">
+        <label for="entryType">Type</label>
+        <select id="entryType">
+          <option value="station">Station</option>
+          <option value="#image">Image</option>
+          <option value="#object">Object</option>
+          <option value="#speed">Speed event</option>
+          <option value="custom">Custom type</option>
+        </select>
+      </div>
+
+      <div class="field" id="customTypeField" hidden>
+        <label for="customType">Custom type</label>
+        <input id="customType" placeholder="Example: #event">
+      </div>
+
+      <div class="field" id="entryLabelField">
+        <label for="entryLabel">Station name</label>
+        <input id="entryLabel" value="Station">
+      </div>
+
+      <div class="field">
+        <label for="entryName" id="entryNameLabel">Image / type name</label>
+        <input id="entryName" value="station.png">
+      </div>
+
+      <div class="field">
+        <label for="entryMeter">Meter</label>
+        <input id="entryMeter" type="number" step="0.1" value="1">
+      </div>
+
+      <div class="field" id="entryPositionFields">
+        <label for="entryX">X offset</label>
+        <input id="entryX" type="number" value="0">
+      </div>
+
+      <div class="field" id="entryYField">
+        <label for="entryY">Y offset</label>
+        <input id="entryY" type="number" value="0">
+      </div>
+
+      <div class="field">
+        <label for="entryCategory">Event category</label>
+        <input id="entryCategory" placeholder="Optional">
+      </div>
+
+      <button style="background-color: green;" onclick="addEntry(); new Audio('main/sounds/editor/press.wav').play()">Add</button>
+    </section>
+    <hr>
+    <section class="panel">
+      <h3>List :</h3>
+      <div id="entry-list"></div>
+    </section>
+
+    <section class="panel" style="visibility: hidden;">
+      <h3>JSON preview</h3>
+      <textarea id="json-preview" readonly></textarea>
+    </section>
+    <a style="opacity: 0.5;">HTS-editor ligne editor2 made by hansy2577b</a>
+  </aside>
+
+  <script>
+    const PIXELS_PER_METER = 2000;
+    const $ = id => document.getElementById(id);
+
+    let entries = [];
+    let selectedIndex = -1;
+    let drag = null;
+
+    // Optional image paths loaded from JSON's "images" object.
+    let imagePaths = {
+      "Station":"main/images/editor/station"
+    };
+
+    function exitEditor() {
+      if (!location.pathname.endsWith("menu.html")) {
+        location.href = "menu.html";
+      }
+    }
+
+    function panView(amount) {
+      $("canvas").scrollLeft += amount;
+    }
+
+    function jsonType(entry) {
+      if (entry.type === "custom") {
+        const custom = entry.customType.trim();
+        return custom.startsWith("#") ? custom : "#" + custom;
+      }
+      return entry.type;
+    }
+
+    function isImageEntry(entry) {
+      var output = "custom";
+      if (entry.type == "station") {
+        output = "station"
+      }
+      if (entry.type == "#images") {
+        output = "#image"
+      }
+      if (entry.type == "#speed") {
+        output = "#speed"
+      }
+        if (entry.type == "#object") {
+        output = "#object"
+      }
+      return output;
+    }
+
+    function safePathPart(value) {
+      return String(value)
+        .split("/")
+        .filter(part => part && part !== "." && part !== "..")
+        .map(encodeURIComponent)
+        .join("/");
+    }
+
+    function getImagePath(entry) {
+      // JSON can map a station/object key to an image path.
+      const mapped = imagePaths[entry.type];
+      if (mapped) return mapped;
+
+      // Image/object entries can use a full or relative path as their name.
+      if ((entry.type+"")[0] === "#") {
+        const name = String(entry.name || "").trim();
+        if (name.includes("/") || /\.[a-z0-9]+$/i.test(name)) return name;
+        return `main/images/editor/a.png`;
+      } else {
+
+      }
+
+      // Stations default to an image named after their station type.
+      const stationName = String(entry.name || "").trim();
+      return `main/images/editor/station.png`;
+    }
+
+    function getLineData() {
+      const grilleText = $("grilleBG").value.trim();
+      const data = {
+        name: $("lineTitle").value,
+        author: $("lineAuthor").value,
+        description: $("lineDescription").value,
+        "line length": Number($("lineLength").value) || 0,
+        "line-BG length": Number($("lineBGLength").value) || 1,
+        destination: $("destination").value,
+        GrilleBG: grilleText
+          ? grilleText.split(",").map(value => Number(value.trim())).filter(Number.isFinite)
+          : [],
+        station: [...entries]
+          .sort((a, b) => a.meter - b.meter)
+          .map(entry => {
+            const type = jsonType(entry);
+
+            if (type === "#speed") {
+              return [type, entry.name, { meter: entry.meter }];
+            }
+
+            if (type === "#image" || type === "#object") {
+              return [
+                type,
+                entry.name,
+                {
+                  position: [entry.x, entry.y],
+                  z: String(entry.z),
+                  scale: entry.scale,
+                  meter: entry.meter,
+                  topTrain: entry.topTrain
+                }
+              ];
+            }
+
+            if (type === "station") {
+              return [
+                entry.name,
+                entry.label,
+                {
+                  y: entry.y,
+                  delay: entry.delay,
+                  meter: entry.meter
+                }
+              ];
+            }
+
+            // Custom event types are kept in the same format as game events.
+            return [type, entry.name, { meter: entry.meter }];
+          }),
+        "line delay": Number($("lineDelay").value) || 0
+      };
+
+      // Keep image paths available to the editor without changing entry data.
+      if (Object.keys(imagePaths).length) data.images = imagePaths;
+
+      return data;
+    }
+
+    function addEntry() {
+      const selectedType = $("entryType").value;
+      const customType = $("customType").value.trim();
+      const type = selectedType === "custom" ? customType : selectedType;
+      const name = $("entryName").value.trim();
+      const meter = Number($("entryMeter").value);
+
+      if (!name) return alert("Enter a name or image path.");
+      if (!Number.isFinite(meter)) return alert("Enter a valid meter value.");
+      if (selectedType === "custom" && !customType) {
+        return alert("Enter a custom type, such as #event.");
+      }
+
+      const isStation = type === "station";
+      const isImage = type === "#image" || type === "#object" || type === "#speed";
+    
+      entries.push({
+        type: selectedType === "custom" ? "custom" : type,
+        customType: selectedType === "custom" ? customType : "",
+        name,
+        label: isStation ? $("entryLabel").value.trim() : name,
+        meter,
+        x: Number($("entryX").value) || 0,
+        y: Number($("entryY").value) || 0,
+        delay: 0,
+        z: 1,
+        scale: 1,
+        topTrain: false,
+        eventCategory: $("entryCategory").value.trim(),
+        isImage
+      });
+
+      selectedIndex = entries.length - 1;
+      render();
+    }
+
+    function updateTypeFields() {
+      const type = $("entryType").value;
+      $("customTypeField").hidden = type !== "custom";
+      $("entryLabelField").hidden = type !== "station";
+      $("entryPositionFields").hidden =
+        type === "station" || type === "#speed" || type === "custom";
+      $("entryYField").hidden =
+        type === "#speed" || type === "custom";
+      $("entryNameLabel").textContent =
+        type === "#speed" || type === "custom" ? "Value / name" : "Image / type name";
+    }
+
+    function render() {
+      const width = Math.max(
+        1000,
+        ((Number($("lineLength").value) || 0) + 1) * PIXELS_PER_METER
+      );
+
+      $("canvas-body").style.width = width + "px";
+      $("track").style.width = width + "px";
+
+      const layer = $("entries");
+      layer.replaceChildren();
+
+      entries.forEach((entry, index) => {
+        if (!isImageEntry(entry)) return;
+
+        const image = document.createElement("img");
+        image.className = "entry-image";
+        image.alt = "";
+        image.title = entry.type === "station"
+          ? entry.label
+          : entry.name;
+        image.draggable = false;
+        image.dataset.index = index;
+        image.style.transform = `scale(${1})`;
+
+        image.onerror = function () {
+          image.src = "main/images/editor/unknow.png";
+        }
+        
+        if (entry.type == "#image") {
+          image.src = `main/images/editor/images.png`;
+        } else if (entry.type == "#object") {
+          image.src = "main/images/editor/obj.png"
+        } else if (entry.type == "#speed") {
+          image.src = "main/images/editor/speed.png";
+        } else if (entry.type[0] !== "#") {
+          image.src = "main/images/editor/station.png";
+          image.style.transform = `scale(${2}) translateY(-10px)`;
+        } else {
+          image.src = "main/images/editor/unknow.png";
+        }
+
+        const xOffset = entry.type === "station" ? 0 : entry.x;
+        const yOffset = entry.type === "station" ? 235 + entry.y : 295 + entry.y;
+
+        image.style.left = (entry.meter * PIXELS_PER_METER + xOffset) + "px";
+        image.style.top = yOffset + "px";
+
+        if (index === selectedIndex) image.classList.add("selected");
+
+        image.addEventListener("pointerdown", startDrag);
+        image.addEventListener("click", event => {
+          event.stopPropagation();
+          selectedIndex = index;
+          new Audio('main/sounds/editor/press.wav').play()
+          render();
+        });
+
+        layer.appendChild(image);
+      });
+
+      renderList();
+      syncSelection();
+      $("json-preview").value = JSON.stringify(getLineData(), null, 2);
+    }
+
+    function renderList() {
+      const list = $("entry-list");
+      list.replaceChildren();
+
+      entries.forEach((entry, index) => {
+        const row = document.createElement("div");
+        row.className =
+          "list-entry" + (index === selectedIndex ? " selected" : "");
+        row.textContent =
+          `${entry.label || entry.name} — ${jsonType(entry)} — ${entry.meter} m`;
+
+        row.addEventListener("click", () => {
+          selectedIndex = index;
+          render();
+        });
+
+        list.appendChild(row);
+      });
+    }
+
+    function syncSelection() {
+      const entry = entries[selectedIndex];
+
+      $("selectedName").value =
+        entry ? (entry.type === "station" ? entry.label : entry.name) : "";
+      $("selectedType").value = entry ? jsonType(entry) : "";
+      $("selectedMeter").value = entry?.meter ?? 0;
+      $("selectedDelay").value = entry?.delay ?? 0;
+      $("selectedScale").value = entry?.scale ?? 1;
+      $("selectedZ").value = entry?.z ?? 1;
+      $("selectedTopTrain").value = String(entry?.topTrain ?? false);
+      $("selectedCategory").value = entry?.eventCategory ?? "";
+    }
+
+    function applySelection() {
+      const entry = entries[selectedIndex];
+      if (!entry) return;
+
+      entry.meter = Number($("selectedMeter").value) || 0;
+      entry.delay = Number($("selectedDelay").value) || 0;
+      entry.scale = Number($("selectedScale").value) || 1;
+      entry.z = Number($("selectedZ").value) || 0;
+      entry.topTrain = $("selectedTopTrain").value === "true";
+      entry.eventCategory = $("selectedCategory").value.trim();
+
+      render();
+    }
+
+    function deleteSelected() {
+      if (selectedIndex < 0) return;
+      entries.splice(selectedIndex, 1);
+      selectedIndex = -1;
+      render();
+    }
+
+    function startDrag(event) {
+      if (event.button !== 0) return;
+      event.preventDefault();
+
+      const index = Number(event.currentTarget.dataset.index);
+      const entry = entries[index];
+      selectedIndex = index;
+
+      drag = {
+        index,
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        meter: entry.meter,
+        y: entry.y
+      };
+
+      render();
+    }
+
+    function moveDrag(event) {
+      if (!drag || event.pointerId !== drag.pointerId) return;
+
+      const zoom = Math.max(0.01, (Number($("zoom").value) || 100) / 100);
+      const dx = (event.clientX - drag.startX) / zoom;
+      const dy = (event.clientY - drag.startY) / zoom;
+      const entry = entries[drag.index];
+
+      if (!entry) return;
+
+      entry.meter = Math.max(0, drag.meter + dx / PIXELS_PER_METER);
+      render();
+    }
+
+    function endDrag(event) {
+      if (!drag) return;
+      if (event && event.pointerId !== drag.pointerId) return;
+      drag = null;
+    }
+
+    document.addEventListener("pointermove", moveDrag);
+    document.addEventListener("pointerup", endDrag);
+    document.addEventListener("pointercancel", endDrag);
+
+    function downloadJSON() {
+      const filename = ($("lineTitle").value.trim() || "route")
+        .replace(/[<>:"/\\|?*\x00-\x1F]/g, "-") + ".json";
+      const blob = new Blob([JSON.stringify(getLineData(), null, 2)], {
+        type: "application/json"
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = filename;
+      link.click();
+
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+    }
+
+    function loadJSONFile() {
+      const file = $("lineFile").files[0];
+      if (!file) return alert("Choose a JSON file first.");
+
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+
+          $("lineTitle").value = data.name || "Imported Route";
+          $("lineAuthor").value = data.author || "";
+          $("lineDescription").value = data.description || "";
+          $("destination").value = data.destination || "";
+          $("lineLength").value = data["line length"] ?? 0;
+          $("lineBGLength").value = data["line-BG length"] ?? 1;
+          $("lineDelay").value = data["line delay"] ?? 0;
+          $("grilleBG").value =
+            Array.isArray(data.GrilleBG) ? data.GrilleBG.join(",") : "";
+
+          imagePaths = data.images || {};
+
+          entries = (Array.isArray(data.station) ? data.station : [])
+            .filter(item => Array.isArray(item) && item.length >= 2)
+            .map(item => {
+              const first = String(item[0] ?? "");
+              const second = String(item[1] ?? "");
+              const info = item[2] || {};
+
+              if (first === "#image" || first === "#object") {
+                return {
+                  type: first,
+                  customType: "",
+                  name: second,
+                  label: second,
+                  meter: Number(info.meter) || 0,
+                  x: Number(info.position?.[0]) || 0,
+                  y: 0,
+                  delay: Number(info.delay) || 0,
+                  z: Number(info.z) || 1,
+                  scale: Number(info.scale) || 1,
+                  topTrain: info.topTrain ?? false,
+                  eventCategory: info.eventCategory || ""
+                };
+              }
+
+              if (first.startsWith("#")) {
+                return {
+                  type: first === "#speed" ? "#speed" : "custom",
+                  customType: first,
+                  name: second,
+                  label: second,
+                  meter: Number(info.meter) || 0,
+                  x: 0,
+                  y: 0,
+                  delay: Number(info.delay) || 0,
+                  z: 1,
+                  scale: 1,
+                  topTrain: false,
+                  eventCategory: ""
+                };
+              }
+
+              return {
+                type: "station",
+                customType: "",
+                name: first,
+                label: second,
+                meter: Number(info.meter) || 0,
+                delay: Number(info.delay) || 0,
+                z: 1,
+                scale: 1,
+                topTrain: info.topTrain ?? false,
+                eventCategory: info.eventCategory || ""
+              };
+            });
+
+          selectedIndex = -1;
+          render();
+        } catch (error) {
+          alert("Invalid JSON file: " + error.message);
+        }
+      };
+
+      reader.readAsText(file);
+    }
+
+    function newLine() {
+      entries = [];
+      imagePaths = {};
+      selectedIndex = -1;
+
+      $("lineTitle").value = "New Route";
+      $("lineAuthor").value = "hansy";
+      $("lineDescription").value = "";
+      $("destination").value = "test";
+      $("lineLength").value = 6;
+      $("lineBGLength").value = 130;
+      $("lineDelay").value = 0;
+      $("grilleBG").value = "0,1,0,1,1,0,0,1";
+
+      render();
+    }
+
+    $("entryType").addEventListener("change", updateTypeFields);
+
+    $("zoom").addEventListener("input", event => {
+      const zoom = Math.max(25, Math.min(200, Number(event.target.value) || 100));
+      $("canvas-body").style.transform = `scale(${zoom / 100})`;
+    });
+
+    ["lineTitle", "lineAuthor", "lineDescription", "destination",
+      "lineLength", "lineBGLength", "lineDelay", "grilleBG"
+    ].forEach(id => $(id).addEventListener("input", render));
+
+    $("canvas").addEventListener("click", event => {
+      if (event.target === $("canvas") || event.target === $("track")) {
+        selectedIndex = -1;
+        render();
+      }
+    });
+
+    updateTypeFields();
+    newLine();
+  </script>
+</body>
+</html>
